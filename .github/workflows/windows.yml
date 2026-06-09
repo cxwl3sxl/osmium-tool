@@ -7,21 +7,27 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-2022
+          - windows-2025
 
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Install vcpkg dependencies
-        run: |
-          vcpkg install `
-            boost-program-options:x64-windows `
-            bzip2:x64-windows `
-            expat:x64-windows `
-            lz4:x64-windows `
-            nlohmann-json:x64-windows `
+      - run: |
+          vcpkg install \
+            boost-program-options:x64-windows \
+            bzip2:x64-windows \
+            expat:x64-windows \
+            lz4:x64-windows \
+            nlohmann-json:x64-windows \
             zlib:x64-windows
         shell: bash
+
+      - uses: actions/checkout@v6
 
       - uses: ./.github/actions/install-from-git
 
@@ -32,5 +38,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: osmium-tool-windows
+          name: osmium-tool-windows-${{ matrix.os }}
           path: build/Release/
